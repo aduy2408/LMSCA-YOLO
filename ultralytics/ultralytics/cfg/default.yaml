@@ -1,0 +1,272 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+# Global configuration YAML with settings and hyperparameters for YOLO training, validation, prediction and export
+# For documentation see https://docs.ultralytics.com/usage/cfg
+
+task: detect # (str) YOLO task, i.e. detect, segment, semantic, classify, pose, obb
+mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmark
+
+# Train settings -------------------------------------------------------------------------------------------------------
+model: # (str, optional) path to model file, i.e. yolo26n.pt or yolo26n.yaml
+data: # (str, optional) path to data file, i.e. coco8.yaml
+epochs: 100 # (int) number of epochs to train for
+time: # (float, optional) max hours to train; overrides epochs if set
+patience: 100 # (int) early stop after N epochs without val improvement
+batch: 16 # (int | float) batch size as int (e.g. 16), or float 0.0–1.0 for AutoBatch fraction of GPU memory
+imgsz: 640 # (int | list) train/val use int (square); predict/export may use [h,w]
+save: True # (bool) save train checkpoints and predict results
+save_period: -1 # (int) save checkpoint every N epochs; disabled if < 1
+cache: False # (bool | str) cache images in RAM (True/'ram') or on 'disk' to speed dataloading; False disables
+device: # (int | str | list) device: 0 or [0,1,2,3] for CUDA, 'cpu'/'mps', or -1/[-1,-1] to auto-select idle GPUs
+workers: 8 # (int) dataloader workers (per RANK if DDP)
+project: # (str, optional) project name for results root
+name: # (str, optional) experiment name; results in 'project/name'
+exist_ok: False # (bool) overwrite existing 'project/name' if True
+pretrained: True # (bool | str) use pretrained weights (bool) or load weights from path (str)
+optimizer: auto # (str) optimizer: SGD, MuSGD, Adam, Adamax, AdamW, NAdam, RAdam, RMSProp, or auto
+verbose: True # (bool) print verbose logs during training/val
+seed: 0 # (int) random seed for reproducibility
+deterministic: True # (bool) enable deterministic ops; reproducible but may be slower
+single_cls: False # (bool) treat all classes as a single class
+rect: False # (bool) rectangular batches for train; rectangular batching for val when mode='val'
+cos_lr: False # (bool) cosine learning rate scheduler
+close_mosaic: 10 # (int) disable mosaic augmentation for final N epochs (0 to keep enabled)
+resume: False # (bool) resume training from last checkpoint in the run dir
+amp: True # (bool) Automatic Mixed Precision (AMP) training; True runs AMP capability check
+fraction: 1.0 # (float) fraction of training dataset to use (1.0 = all)
+profile: False # (bool) profile ONNX/TensorRT speeds during training for loggers
+freeze: # (int | list, optional) freeze first N layers (int) or specific layer indices (list)
+multi_scale: 0.0 # (float) multi-scale range as a fraction of imgsz; sizes are rounded to stride multiples
+compile: False # (bool | str) enable torch.compile() backend='inductor'; True="default", False=off, or "default|reduce-overhead|max-autotune-no-cudagraphs"
+
+# Segmentation
+overlap_mask: True # (bool) merge instance masks into one mask during training (segment only)
+mask_ratio: 4 # (int) mask downsample ratio (segment only)
+
+# Classification
+dropout: 0.0 # (float) dropout for classification head (classify only)
+
+# Val/Test settings ----------------------------------------------------------------------------------------------------
+val: True # (bool) run validation/testing during training
+fitness_metric: map50_95 # (str) metric for best checkpoint and early stopping: map50_95 or map50
+split: val # (str) dataset split to evaluate: 'val', 'test' or 'train'
+save_json: False # (bool) save results to COCO JSON (detect/segment/pose) or PNG masks (semantic) for external evaluation
+conf: # (float, optional) confidence threshold; defaults: predict=0.25, val=0.001
+iou: 0.7 # (float) IoU threshold used for NMS
+max_det: 300 # (int) maximum number of detections per image
+nms_method: hard # (str) NMS method: hard, soft-linear, or soft-gaussian
+soft_nms_sigma: 0.5 # (float) sigma for Gaussian Soft-NMS
+soft_nms_min_score: 0.001 # (float) minimum score to keep after Soft-NMS decay
+box_voting: false # (bool) EXPERIMENTAL refine NMS-kept boxes with same-class overlapping candidates
+box_voting_iou: 0.5 # (float) EXPERIMENTAL minimum IoU for box voting candidates
+box_voting_weight: score_iou # (str) EXPERIMENTAL box voting weight: score_iou or score_iou2
+half: False # (bool) use half precision (FP16) if supported
+dnn: False # (bool) use OpenCV DNN for ONNX inference
+plots: True # (bool) save plots and images during train/val
+end2end: # (bool, optional) whether to use end2end head (YOLO26, YOLOv10) for predict/val/export
+
+# Predict settings -----------------------------------------------------------------------------------------------------
+source: # (str, optional) path/dir/URL/stream for images or videos; e.g. 'ultralytics/assets' or '0' for webcam
+vid_stride: 1 # (int) read every Nth frame for video sources
+stream_buffer: False # (bool) True buffers all frames; False keeps the most recent frame for low-latency streams
+visualize: False # (bool) visualize model features (predict) or TP/FP/FN confusion (val)
+augment: False # (bool) apply test-time augmentation during prediction
+agnostic_nms: False # (bool) class-agnostic NMS
+classes: # (int | list[int], optional) filter by class id(s), e.g. 0 or [0,2,3]
+retina_masks: False # (bool) use high-resolution segmentation masks (segment)
+embed: # (list[int], optional) return feature embeddings from given layer indices
+
+# Visualize settings ---------------------------------------------------------------------------------------------------
+show: False # (bool) show images/videos in a window if supported
+save_frames: False # (bool) save individual frames from video predictions
+save_txt: False # (bool) save results as .txt files (xywh format)
+save_conf: False # (bool) save confidence scores with results
+save_crop: False # (bool) save cropped prediction regions to files
+show_labels: True # (bool) draw class labels on images, e.g. 'person'
+show_conf: True # (bool) draw confidence values on images, e.g. '0.99'
+show_boxes: True # (bool) draw bounding boxes on images
+line_width: # (int, optional) line width of boxes; auto-scales with image size if not set
+
+# Export settings ------------------------------------------------------------------------------------------------------
+format: torchscript # (str) target format, e.g. torchscript|onnx|openvino|engine|coreml|saved_model|pb|tflite|edgetpu|tfjs|paddle|mnn|ncnn|imx|rknn|executorch|axelera|deepx|qnn
+keras: False # (bool) TF SavedModel only (format=saved_model); enable Keras layers during export
+optimize: False # (bool) TorchScript: mobile optimizations; DEEPX: higher compiler optimization (slower compile, faster inference)
+int8: False # (bool) INT8/PTQ where supported (openvino, engine, coreml, tflite, tfjs, mnn, imx, rknn, axelera, deepx); needs calibration data/fraction
+dynamic: False # (bool) dynamic shapes for torchscript, onnx, openvino, engine, coreml; enable variable image sizes
+simplify: True # (bool) ONNX/engine only; run graph simplifier for cleaner ONNX before runtime conversion
+opset: # (int, optional) ONNX/engine only; opset version for export; leave unset to use a tested default
+workspace: # (float, optional) engine (TensorRT) only; workspace size in GiB, e.g. 4
+nms: False # (bool) fuse NMS into exported model when backend supports; if True, conf/iou apply (agnostic_nms except coreml)
+
+# Hyperparameters ------------------------------------------------------------------------------------------------------
+lr0: 0.01 # (float) initial learning rate (SGD=1e-2, Adam/AdamW=1e-3)
+lrf: 0.01 # (float) final LR fraction; final LR = lr0 * lrf
+momentum: 0.937 # (float) SGD momentum or Adam beta1
+weight_decay: 0.0005 # (float) weight decay (L2 regularization)
+warmup_epochs: 3.0 # (float) warmup epochs (fractions allowed)
+warmup_momentum: 0.8 # (float) initial momentum during warmup
+warmup_bias_lr: 0.1 # (float) bias learning rate during warmup
+box: 7.5 # (float) box loss gain
+bbox_iou_loss: ciou # (str) bbox regression IoU loss: ciou, wiou, iou, giou, diou, eiou, siou
+wiou_monotonous: false # (bool) Wise-IoU focusing mode: false=non-monotonic, true=monotonic
+cls_iou_target: false # (bool) EXPERIMENTAL use assigned box IoU as positive classification target
+positive_confidence_rescue_gain: 0.0 # (float) EXPERIMENTAL TAL-positive confidence rescue gain
+positive_confidence_rescue_gamma: 1.0 # (float) EXPERIMENTAL low-target rescue focusing exponent
+vfl: false # (bool) EXPERIMENTAL use Varifocal Loss with assigned IoU as positive classification target
+vfl_alpha: 0.75 # (float) EXPERIMENTAL Varifocal Loss negative alpha
+vfl_gamma: 2.0 # (float) EXPERIMENTAL Varifocal Loss focusing gamma
+vfl_iou_detach: true # (bool) EXPERIMENTAL detach assigned IoU before using it as VFL classification target
+vfl_pos_q_weight: true # (bool) EXPERIMENTAL weight positive VFL examples by IoU quality target
+tal_topk: 10 # (int) EXPERIMENTAL TaskAlignedAssigner top-k positive candidates
+tal_alpha: 0.5 # (float) EXPERIMENTAL TaskAlignedAssigner classification score exponent
+tal_beta: 6.0 # (float) EXPERIMENTAL TaskAlignedAssigner IoU exponent
+vfl_weight_box_by_q: false # (bool) EXPERIMENTAL weight positive box/DFL loss by assigned IoU target
+box_q_weight_min: 0.25 # (float) EXPERIMENTAL minimum quality weight for VFL box/DFL weighting
+boundary_contrast: 0.0 # (float) EXPERIMENTAL boundary-aware contrastive loss gain for tiny-object localization
+boundary_levels: 2 # (int) EXPERIMENTAL number of Detect feature levels to use for boundary contrast
+boundary_ring: 1.0 # (float) EXPERIMENTAL boundary ring thickness in feature-cell units
+boundary_samples: 16 # (int) EXPERIMENTAL max samples per object group and feature level
+boundary_tau: 0.2 # (float) EXPERIMENTAL InfoNCE temperature for boundary contrast
+boundary_shrinkage: 0.25 # (float) EXPERIMENTAL feature boundary interior shrinkage
+loc_quality: 0.0 # (float) EXPERIMENTAL localization quality map loss gain for tiny-object localization
+loc_quality_levels: 2 # (int) EXPERIMENTAL number of Detect feature levels to supervise with LQM
+loc_quality_sigma: 0.45 # (float) EXPERIMENTAL Gaussian sigma scale for localization quality targets
+loc_quality_loss: mse # (str) EXPERIMENTAL LQM loss type: mse or smoothl1
+dgfe_rec_gain: 0.0 # (float) EXPERIMENTAL SR-DGFE reconstruction loss gain
+dgfe_spatial_gain: 0.0 # (float) EXPERIMENTAL SR-DGFE spatial filtration loss gain
+dgfe_spatial_warmup_epochs: 0 # (int) EXPERIMENTAL epochs to linearly warm up SR-DGFE spatial loss gain
+dgfe_spatial_warmup_start: 0.1 # (float) EXPERIMENTAL starting fraction for SR-DGFE spatial warmup
+dgfe_boundary_ring: 1.0 # (float) EXPERIMENTAL SR-DGFE boundary ring thickness in P2 cells
+dgfe_inner_value: 0.3 # (float) EXPERIMENTAL SR-DGFE bbox interior target value
+dgfe_tiny_area: 4.0 # (float) EXPERIMENTAL SR-DGFE boxes at or below this P2-cell area use target 1.0
+dgfe_neg_pos_ratio: 3 # (int) EXPERIMENTAL SR-DGFE hard-negative background samples per positive
+dgfe_neg_gain: 0.25 # (float) EXPERIMENTAL SR-DGFE hard-negative loss gain
+dgfe_spatial_target_mode: iou # (str) EXPERIMENTAL SR-DGFE spatial target mode: iou or edge_error
+dgfe_edge_error_norm: 0.25 # (float) EXPERIMENTAL side error fraction that saturates edge_error DGFE targets
+p2_detail_rec_gain: 0.0 # (float) EXPERIMENTAL masked P2 local-detail reconstruction loss gain
+quality_head: false # (bool) EXPERIMENTAL predict IoU quality per anchor for score calibration
+quality_loss: bce # (str) EXPERIMENTAL quality-head loss: bce, bce_balanced, or l1
+quality_gain: 0.5 # (float) EXPERIMENTAL quality-head loss gain for balanced BCE
+quality_neg_gain: 0.10 # (float) EXPERIMENTAL negative term gain for balanced quality-head BCE
+quality_pos_iou_thr: 0.5 # (float) EXPERIMENTAL IoU threshold for quality-head positive expansion
+quality_hard_neg_iou_thr: 0.3 # (float) EXPERIMENTAL max IoU for quality-head hard negatives
+quality_hard_neg_score_thr: 0.05 # (float) EXPERIMENTAL min class score for quality-head hard negatives
+quality_target_mode: iou_power # (str) EXPERIMENTAL quality-head target mode: iou_power or ap75_ramp
+quality_target_power: 1.0 # (float) EXPERIMENTAL power applied to IoU targets for quality-head BCE
+quality_ramp_low: 0.50 # (float) EXPERIMENTAL lower IoU bound for ap75_ramp quality targets
+quality_ramp_high: 0.75 # (float) EXPERIMENTAL upper IoU bound for ap75_ramp quality targets
+quality_neg_mode: hard # (str) EXPERIMENTAL quality-head negatives: hard or all
+quality_score_mode: cls_mul_q # (str) EXPERIMENTAL quality score mode: cls_mul_q, sqrt_cls_mul_q, or cls_mul_q2
+quality_box_features: false # (bool) EXPERIMENTAL feed DFL/box summary maps into quality head
+quality_box_detach: true # (bool) EXPERIMENTAL detach DFL/box summary before quality head
+quality_detach_target: true # (bool) EXPERIMENTAL detach IoU target for quality-head supervision
+quality_debug: false # (bool) EXPERIMENTAL print quality-head training diagnostics
+quality_debug_batches: 1 # (int) EXPERIMENTAL number of quality-head training batches to log
+quality_debug_export: false # (bool) EXPERIMENTAL export validation quality-head diagnostics
+quality_debug_max_preds: 30000 # (int) EXPERIMENTAL max pre-NMS quality debug candidates to export
+quality_probe_export: false # (bool) EXPERIMENTAL export box/DFL features for quality-head probing
+quality_probe_max_preds: 30000 # (int) EXPERIMENTAL max pre-NMS quality probe candidates to export
+rank_loss: 0.0 # (float) EXPERIMENTAL pairwise localization ranking loss gain
+rank_tau: 0.25 # (float) EXPERIMENTAL pairwise ranking temperature
+rank_iou_margin: 0.10 # (float) EXPERIMENTAL minimum IoU gap for ranking pairs
+rank_topk: 10 # (int) EXPERIMENTAL foreground candidates per GT for ranking loss
+loc_assign: false # (bool) EXPERIMENTAL use localization-only positive mining for box/DFL loss
+loc_assign_topk: 3 # (int) EXPERIMENTAL extra local anchors per GT for box/DFL loss
+loc_assign_max_stride: 8.0 # (float) EXPERIMENTAL only mine anchors up to this stride, e.g. P2/P3
+loc_assign_center_radius: 2.5 # (float) EXPERIMENTAL GT-center radius in stride units for loc-positive mining
+loc_assign_weight: 0.5 # (float) EXPERIMENTAL box/DFL target weight for mined loc positives
+box_consensus_gain: 0.0 # (float) EXPERIMENTAL P2 TAL-positive decoded-box consensus gain
+box_consensus_warmup_start: 5 # (int) EXPERIMENTAL epochs held at zero consensus gain
+box_consensus_warmup_end: 15 # (int) EXPERIMENTAL epoch where full consensus gain is reached
+box_consensus_log_grad_ratio: false # (bool) EXPERIMENTAL log decoded-box consensus/box gradient norm ratio
+positive_support_dropout: false # (bool) EXPERIMENTAL Positive-Support Dropout (Dominant-Support Suppression)
+positive_support_mode: dominant # (str) EXPERIMENTAL PSD mode: dominant, random, or none
+positive_support_gain: 0.0 # (float) EXPERIMENTAL positive support dropout loss gain (default to 0.0 to remain fully disabled)
+positive_support_prob: 0.5 # (float) EXPERIMENTAL probability of dropping dominant positive support
+positive_support_min_count: 3 # (int) EXPERIMENTAL minimum positive support count to drop
+positive_support_aux_topk: 3 # (int) EXPERIMENTAL maximum alternative support locations to compute loss
+positive_support_radius: 2 # (int) EXPERIMENTAL P2 radius around dominant support to look for alternative supports
+positive_support_fill_kernel: 3 # (int) EXPERIMENTAL average pool kernel size for local mean fill value
+positive_support_warmup_start: 5 # (int) EXPERIMENTAL epochs held at zero positive support dropout gain
+positive_support_warmup_end: 15 # (int) EXPERIMENTAL epoch where full positive support dropout gain is reached
+cls_geometry_fuse: false # (bool) EXPERIMENTAL fuse DFL expected box distances into Detect cls head
+cls_geometry_mode: add # (str) EXPERIMENTAL cls geometry fusion mode: add or concat
+cls_geometry_detach: true # (bool) EXPERIMENTAL detach geometry cue before cls fusion
+cls_deform_geometry: false # (bool) EXPERIMENTAL reserved VFNet-like deformable cls geometry path
+dfl_residual: false # (bool) EXPERIMENTAL add 4-channel DFL residual branch in Detect head
+dfl_residual_scale: 0.25 # (float) EXPERIMENTAL max residual offset in DFL-bin units
+cls: 0.5 # (float) classification loss gain
+cls_pw: 0.0 # (float) class weights power for handling class imbalance (0.0=disable, 1.0=full inverse frequency)
+dfl: 1.5 # (float) distribution focal loss gain
+pc_dfl_gain: 0.0 # (float) P2 non-uniform DFL target-pair competition gain
+pc_dfl_margin: 1.5 # (float) logit margin over adjacent DFL bins
+cfr_gain: 0.0 # (float) conflict-guided fine reconstruction gain
+cfr_detail_gain: 1.0 # (float) local-detail reconstruction term gain
+cfr_cos_gain: 1.0 # (float) feature cosine reconstruction term gain
+cfr_conflict_weight: 3.0 # (float) P2 DFL conflict spatial weight
+pose: 12.0 # (float) pose loss gain (pose tasks)
+kobj: 1.0 # (float) keypoint objectness loss gain (pose tasks)
+rle: 1.0 # (float) rle loss gain (pose tasks)
+angle: 1.0 # (float) oriented angle loss gain (obb tasks)
+nbs: 64 # (int) nominal batch size used for loss normalization
+hsv_h: 0.015 # (float) HSV hue augmentation fraction
+hsv_s: 0.7 # (float) HSV saturation augmentation fraction
+hsv_v: 0.4 # (float) HSV value (brightness) augmentation fraction
+degrees: 0.0 # (float) rotation degrees (+/-)
+translate: 0.1 # (float) translation fraction (+/-)
+scale: 0.5 # (float | tuple) scale gain (+/-) as float, or explicit (min, max) tuple
+shear: 0.0 # (float) shear degrees (+/-)
+perspective: 0.0 # (float) perspective fraction (0–0.001 typical)
+flipud: 0.0 # (float) vertical flip probability
+fliplr: 0.5 # (float) horizontal flip probability
+bgr: 0.0 # (float) RGB↔BGR channel swap probability
+hf_atten_prob: 0.0 # (float) EXPERIMENTAL random high-frequency attenuation probability
+hf_atten_min_alpha: 0.0 # (float) EXPERIMENTAL minimum retained high-frequency residual
+hf_atten_max_alpha: 1.0 # (float) EXPERIMENTAL maximum retained high-frequency residual
+hf_atten_blur_kernel: 5 # (int) EXPERIMENTAL odd blur kernel for high-frequency residual
+hf_atten_mask_grid: 16 # (int) EXPERIMENTAL random alpha grid size before upsampling
+mosaic: 1.0 # (float) mosaic augmentation probability
+mosaic_policy: standard # (str) standard or hard_negative (M5)
+mosaic_policy_candidates: 16 # (int) visibility-preserving center proposals used by M5
+mosaic_policy_topk: 4 # (int) stochastic pool among the highest-scoring M5 proposals
+mosaic_visibility_thresh: 0.70 # (float) partial-box visibility threshold used by M5
+mosaic_visibility_lambda: 1.0 # (float) partial-box penalty used by M5
+hard_negative_tile: false # (bool) replace one M5 donor with a mined hard-negative crop
+hardneg_mosaic_prob: 0.30 # (float) probability of hard-negative donor replacement
+hard_negative_bank: # (str, optional) JSON bank created by tools/mine_mosaic_hard_negatives.py
+mixup: 0.0 # (float) MixUp augmentation probability
+cutmix: 0.0 # (float) CutMix augmentation probability
+copy_paste: 0.0 # (float) segmentation copy-paste probability
+copy_paste_mode: flip # (str) copy-paste strategy for segmentation: flip or mixup
+# Detection CP2 is separate from the segmentation copy_paste option above.
+copy_paste_enabled: false # (bool) enable object-detection Copy-Paste
+copy_paste_p: 0.5 # (float) image probability
+copy_paste_unit: single # (str) CP2 uses a single source object
+copy_paste_copies: 1 # (int) source default; the CP2 case explicitly overrides this to two
+copy_paste_placement: random # (str) random or collision_aware
+copy_paste_max_overlap: 0.0 # (float) overlap threshold for collision-aware placement
+copy_paste_padding: 0.0 # (float) CP2 crop padding (locked to zero)
+copy_paste_scale: 1.0 # (float) CP2 source scale (locked to native scale)
+copy_paste_blend: hard # (str) CP2 blend mode (locked to hard)
+copy_paste_max_trials: 30 # (int) destination attempts per copy
+copy_paste_allow_empty_target: true # (bool) allow CP2 on empty target images
+copy_paste_allow_same_source: true # (bool) permit source and target image identity
+adaptive_zoom: false # (bool) training-only GT-aware crop-and-resize
+adaptive_zoom_probability: 0.5 # (float) probability for the project Adaptive Zoom adaptation
+adaptive_zoom_target_min_side: 16.0 # (float) target tiny-object min side in pixels
+adaptive_zoom_max_factor: 2.0 # (float) maximum crop zoom factor
+adaptive_zoom_visible_ratio: 0.5 # (float) minimum visible-area ratio after crop
+adaptive_zoom_center_jitter: 0.05 # (float) deterministic seeded crop-center jitter
+support_assignment: false # (bool) posterior support-aware TAL candidate filtering
+support_assignment_topk: 5 # (int) retained useful candidates per GT
+localization_distill: false # (bool) train-only DFL localization distillation
+localization_distill_teacher: "" # (str) explicit teacher checkpoint path
+localization_distill_lambda: 0.1 # (float) conservative LD coefficient
+auto_augment: randaugment # (str) classification auto augmentation policy: randaugment, autoaugment, augmix
+erasing: 0.4 # (float) random erasing probability for classification (0.0–1.0)
+
+# Custom config.yaml ---------------------------------------------------------------------------------------------------
+cfg: # (str, optional) path to a config.yaml that overrides defaults
+
+# Tracker settings ------------------------------------------------------------------------------------------------------
+tracker: botsort.yaml # (str) tracker config: botsort.yaml, bytetrack.yaml, ocsort.yaml, deepocsort.yaml, fasttrack.yaml, tracktrack.yaml
