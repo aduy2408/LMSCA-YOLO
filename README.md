@@ -140,6 +140,16 @@ LMSCA-YOLO/
 └── README.md
 ```
 
+## Figures
+
+### Architecture
+
+![LMSCA-YOLO architecture](assets/lmsca-yolo-architecture.png)
+
+### Efficiency and accuracy comparison
+
+![LMSCA-YOLO efficiency comparison](assets/lmsca-yolo-efficiency.png)
+
 ## Citation
 
 If you find this code or method useful, please cite:
